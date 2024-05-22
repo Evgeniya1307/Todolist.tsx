@@ -1,4 +1,6 @@
-import React from 'react';
+import { Button } from "./Button";
+
+
 
 type Task = {
   id: number;
@@ -17,21 +19,26 @@ export const Todolist = ({ title, tasks }: PropsType) => {
       <h3>{title}</h3>
       <div className="input-group">
         <input type="text" placeholder="Add new task" />
-        <button>+</button>
+        <Button title={'+'} />
       </div>
-      <ul>
-        {tasks.map(task => (
-          <li key={task.id}>
-            <input type="checkbox" checked={task.isDone} readOnly />
-            <span>{task.title}</span>
-          </li>
-        ))}
-      </ul>
+      {tasks.length === 0 ? (
+        <p>Тасок нет</p>
+      ) : (
+        <ul>
+          {tasks.map(task => (
+            <li key={task.id}>
+              <input type="checkbox" checked={task.isDone} readOnly />
+              <span>{task.title}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="buttons">
-        <button>All</button>
-        <button>Active</button>
-        <button>Completed</button>
+      <Button title={'All'} />
+        <Button title={'Active'} />
+        <Button title={'Completed'} />
       </div>
     </div>
   );
 };
+
