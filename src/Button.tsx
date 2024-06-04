@@ -1,7 +1,8 @@
 type ButtonPropsType = {
-    title: string
-  }
-   
-  export const Button = ({ title }: ButtonPropsType) => {
-    return <button>{title}</button>
-  }
+  title: string;
+  onClick?: () => void;//необязательное поле (указанное с помощью знака вопроса ?)
+};
+
+export const Button = ({ title, onClick }: ButtonPropsType) => {
+  return <button onClick={onClick}>{title}</button>;
+};
