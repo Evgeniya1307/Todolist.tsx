@@ -1,20 +1,23 @@
-import { FilterValuesType } from "./App";
-import { Button } from "./Button";
+// Todolist.tsx
 
-type Task = {
-  id: number;
+import React from 'react';
+import { Button } from './Button'; // Импортируем компонент Button
+import { FilterValuesType } from './App';
+
+type TaskType = {
+  id: string;
   title: string;
   isDone: boolean;
 };
 
 type PropsType = {
   title: string;
-  tasks: Task[];
-  removeTask: (taskId: number) => void;
+  tasks: TaskType[]; // Использую тип TaskType вместо Task
+  removeTask: (taskId: string) => void;
   changeFilter: (filter: FilterValuesType) => void;
 };
 
-export const Todolist = ({ title, tasks, removeTask, changeFilter }: PropsType) => {
+export const Todolist: React.FC<PropsType> = ({ title, tasks, removeTask, changeFilter }) => {
   return (
     <div className="todolist">
       <h3>{title}</h3>
@@ -27,7 +30,7 @@ export const Todolist = ({ title, tasks, removeTask, changeFilter }: PropsType) 
       ) : (
         <ul>
           {tasks.map(task => (
-            <li key={task.id}>
+            <li key={task.id}> {/* Используем уникальный id для ключа */}
               <input type="checkbox" checked={task.isDone} readOnly />
               <span>{task.title}</span>
               <button onClick={() => removeTask(task.id)}>x</button>
