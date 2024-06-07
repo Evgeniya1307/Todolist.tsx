@@ -1,8 +1,7 @@
 // App.tsx
-
 import { useState } from 'react';
 import './App.css';
-import { Todolist } from './Todolist'; 
+import { Todolist } from './Todolist';
 import { v1 } from 'uuid';
 
 type TaskType = {
@@ -21,7 +20,7 @@ function App() {
     { id: v1(), title: 'Redux', isDone: false },
     { id: v1(), title: 'Typescript', isDone: false },
     { id: v1(), title: 'RTK query', isDone: false },
-  ])
+  ]);
 
   const [filter, setFilter] = useState<FilterValuesType>('all');
 
@@ -32,6 +31,16 @@ function App() {
 
   const changeFilter = (filter: FilterValuesType) => {
     setFilter(filter);
+  };
+
+  const addTask = () => {
+    const newTask: TaskType = {
+      id: v1(),
+      title: 'New Task',
+      isDone: false,
+    };
+
+    setTasks(prevTasks => [newTask, ...prevTasks]);
   };
 
   let tasksForTodolist = tasks;
@@ -48,9 +57,10 @@ function App() {
     <div className="App">
       <Todolist
         title="What to learn"
-        tasks={tasksForTodolist} // Уже в нужном формате
+        tasks={tasksForTodolist}
         removeTask={removeTask}
         changeFilter={changeFilter}
+        addTask={addTask} // Передача функции addTask в компонент Todolist
       />
     </div>
   );
