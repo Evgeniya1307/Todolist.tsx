@@ -67,3 +67,12 @@ code {
   display: flex;
   justify-content: space-between;
 }
+
+/* будем визуально выделять поле ввода и писать пользователю сообщение, что title is required */
+.error {
+  border: red 1px solid;
+}
+ 
+.error-message {
+  color: red;
+}
