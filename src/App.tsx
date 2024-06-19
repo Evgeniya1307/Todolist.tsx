@@ -9,9 +9,20 @@ type TaskType = {
   isDone: boolean;
 };
 
+type TodolistType = {
+  id: string;
+  title: string;
+  filter: FilterValuesType;
+}
+
 export type FilterValuesType = 'all' | 'active' | 'completed';
 
 function App() {
+  let [todolists, setTodolists] = useState<TodolistType[]>([
+    { id: v1(), title: 'What to learn', filter: 'all' },
+    { id: v1(), title: 'What to buy', filter: 'all' },
+  ]);
+
   const [tasks, setTasks] = useState<TaskType[]>([
     { id: v1(), title: 'HTML&CSS', isDone: true },
     { id: v1(), title: 'JS', isDone: true },
@@ -21,17 +32,18 @@ function App() {
     { id: v1(), title: 'RTK query', isDone: false },
   ]);
 
-  const [filter, setFilter] = useState<FilterValuesType>('all');
-
+  // Функция для удаления задачи
   const removeTask = (taskId: string) => {
     const filteredTasks = tasks.filter(task => task.id !== taskId);
     setTasks(filteredTasks);
   };
 
-  const changeFilter = (filter: FilterValuesType) => {
-    setFilter(filter);
+  // Функция для изменения фильтра. Исправлено, чтобы учитывать id списка дел.
+  const changeFilter = (filter: FilterValuesType, todolistId: string) => {
+    setTodolists(todolists.map(tl => (tl.id === todolistId ? { ...tl, filter } : tl)));
   };
 
+  // Функция для добавления новой задачи
   const addTask = (title: string) => {
     const newTask: TaskType = {
       id: v1(),
@@ -39,39 +51,46 @@ function App() {
       isDone: false,
     };
 
-  
-
     const newTasks = [newTask, ...tasks];
     setTasks(newTasks);
   };
 
-  const changeTaskStatus = (taskId: string, taskStatus: boolean) => {//фу-ия прин 2 аргумента строку индефикатор задач и статус который менять
-    const newState = tasks.map(t => (t.id == taskId ? { ...t, isDone: taskStatus } : t))//метод map для создания нового массива задач (tasks), который основывается на текущем массиве tasks/map проходит по каждой задаче (t) в массиве tasks/Для каждой задачи проверяется, совпадает ли ее id с переданным taskId
-    setTasks(newState)//обновл состояние tasks новым массивом задач
-  }
-  let tasksForTodolist = tasks;
-
-  if (filter === 'active') {
-    tasksForTodolist = tasks.filter(task => !task.isDone);
-  }
-
-  if (filter === 'completed') {
-    tasksForTodolist = tasks.filter(task => task.isDone);
-  }
+  // Функция для изменения статуса задачи
+  const changeTaskStatus = (taskId: string, isDone: boolean) => {
+    const updatedTasks = tasks.map(task => task.id === taskId ? { ...task, isDone } : task);
+    setTasks(updatedTasks);
+  };
 
   return (
     <div className="App">
-      <Todolist
-        title="What to learn"
-        tasks={tasksForTodolist}
-        removeTask={removeTask}
-        changeFilter={changeFilter}
-        addTask={addTask}
-        changeTaskStatus={changeTaskStatus} // Передача функции changeTaskStatus в компонент Todolist
-      />
+      {todolists.map(tl => {
+        // Фильтрация задач на основе текущего фильтра списка дел
+        let tasksForTodolist = tasks;
+        if (tl.filter === 'active') {
+          tasksForTodolist = tasks.filter(task => !task.isDone);
+        }
+        if (tl.filter === 'completed') {
+          tasksForTodolist = tasks.filter(task => task.isDone);
+        }
+        return (
+          <Todolist
+            key={tl.id}
+            todolistId={tl.id} // Передача id списка дел
+            title={tl.title}
+            tasks={tasksForTodolist}
+            removeTask={removeTask}
+            // Передача функции changeFilter с учетом id списка дел
+            changeFilter={(filter) => changeFilter(filter, tl.id)}
+            addTask={addTask}
+            changeTaskStatus={changeTaskStatus}
+            currentFilter={tl.filter} // Передача текущего фильтра в компонент Todolist
+          />
+        )
+      })}
     </div>
   );
 }
 
 export default App;
+
 

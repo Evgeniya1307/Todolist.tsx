@@ -1,8 +1,14 @@
 type ButtonPropsType = {
   title: string;
-  onClick?: () => void;//необязательное поле (указанное с помощью знака вопроса ?)
+  onClick?: () => void; // необязательное поле
+  className?: string; // необязательное поле
 };
 
-export const Button = ({ title, onClick }: ButtonPropsType) => {
-  return <button onClick={onClick}>{title}</button>;
+export const Button: React.FC<ButtonPropsType> = ({ title, onClick, className }) => {
+  return (
+    <button className={className} onClick={onClick}>
+      {title}
+    </button>
+  );
 };
+

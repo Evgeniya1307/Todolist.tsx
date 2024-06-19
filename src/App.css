@@ -76,3 +76,14 @@ code {
 .error-message {
   color: red;
 }
+
+/* визуально подсвечивать активную кнопку фильтра */
+.active-filter {
+  background-color: lightgreen;
+}
+
+/* Стили для выполненных тасок */
+
+.is-done {
+  opacity: 0.5;
+}
