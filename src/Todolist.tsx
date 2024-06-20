@@ -2,75 +2,90 @@ import React, { useState, ChangeEvent } from 'react';
 import { Button } from './Button';
 import { FilterValuesType } from './App';
 
-//типы данных для задачи
+// Типы данных для задачи
 type TaskType = {
   id: string;
   title: string;
   isDone: boolean;
 };
 
-//пропсы
+// Пропсы
 type PropsType = {
   title: string;
-  todolistId: string; // Добавлено поле для id списка дел которые перадаю из App
+  todolistId: string;
   tasks: TaskType[];
-  removeTask: (taskId: string) => void;
+  removeTask: (taskId: string, todolistId: string) => void;
+  removeTodolist: (todolistId: string) => void; // Добавляем removeTodolist как пропс
   changeFilter: (filter: FilterValuesType, todolistId: string) => void;
-  addTask: (title: string) => void;
-  changeTaskStatus: (taskId: string, isDone: boolean) => void; // Новый пропс
-  currentFilter: FilterValuesType; // Новый пропс
+  addTask: (title: string, todolistId: string) => void;
+  changeTaskStatus: (taskId: string, isDone: boolean, todolistId: string) => void;
+  currentFilter: FilterValuesType;
 };
 
 export const Todolist: React.FC<PropsType> = ({
   title,
-  todolistId, // Получение id списка дел
+  todolistId,
   tasks,
   removeTask,
+  removeTodolist,
   changeFilter,
   addTask,
   changeTaskStatus,
-  currentFilter // Новый пропс
+  currentFilter
 }) => {
-  const [taskTitle, setTaskTitle] = useState(''); //хранит текущее значение ввода нов задачи
-  const [error, setError] = useState<string | null>(null); //в state хранить текст ошибки (или null, если ошибки нет). И вот если в state есть ошибка - добавляем класс error и показываем сообщение с ошибкой
+  //будет выз-ся для удаления списка дел
+  const removeTodolistHandler = () => {
+    removeTodolist(todolistId);
+  };
 
+  // Стейт для хранения заголовка новой задачи
+  const [taskTitle, setTaskTitle] = useState('');
+  // Стейт для хранения ошибки
+  const [error, setError] = useState<string | null>(null); //либо строка либо нул
+
+  // Обработчик для добавления новой задачи
   const addTaskHandler = () => {
     if (taskTitle.trim() !== '') {
-      addTask(taskTitle.trim()); //не пробелов ни пустой строки
-      setTaskTitle('');
+      addTask(taskTitle.trim(), todolistId); // Добавление новой задачи с учетом todolistId
+      setTaskTitle(''); // Очистка поля ввода после добавления задачи
     } else {
-      setError('Title is required');
+      setError('Title is required'); // Установка ошибки, если заголовок пустой
     }
   };
 
+  // Обработчик для изменения статуса задачи
   const changeTaskStatusHandler = (taskId: string) => (e: ChangeEvent<HTMLInputElement>) => {
     const newStatusValue = e.currentTarget.checked;
-    changeTaskStatus(taskId, newStatusValue); // Используем переданный callback
+    changeTaskStatus(taskId, newStatusValue, todolistId); // Изменение статуса задачи с учетом todolistId
   };
 
+  // Обработчик для нажатия клавиши Enter в поле ввода
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    setError(null); //Если после появления ошибки начать вводить текст, то ошибка не пропадет и поле по прежнему будет выделено красным цветом чтобы избежать то пишем так и обнуляем ошибку
+    setError(null); // Сброс ошибки при вводе текста
     if (event.key === 'Enter') {
-      addTaskHandler();
+      addTaskHandler(); // Вызов добавления задачи при нажатии Enter
     }
   };
 
   return (
     <div className="todolist">
-      <h3>{title}</h3>
+      <div className={'todolist-title-container'}>
+        <h3>{title}</h3>
+        <Button title={'x'} onClick={removeTodolistHandler} />
+      </div>
       <div className="input-group">
         <input
           className={error ? 'error' : ''}
           type="text"
           value={taskTitle}
-          onChange={event => setTaskTitle(event.currentTarget.value)}
-          onKeyUp={handleKeyPress}
+          onChange={event => setTaskTitle(event.currentTarget.value)} // Обновление стейта taskTitle при изменении текста
+          onKeyUp={handleKeyPress} // Вызов handleKeyPress при отпускании клавиши
         />
-        <Button title={'+'} onClick={addTaskHandler} />
-        {error && <div className={'error-message'}>{error}</div>}
+        <Button title={'+'} onClick={addTaskHandler} /> {/* Кнопка для добавления новой задачи */}
+        {error && <div className={'error-message'}>{error}</div>} {/* Сообщение об ошибке */}
       </div>
       {tasks.length === 0 ? (
-        <p>Тасок нет</p>
+        <p>Тасок нет</p> // Отображение сообщения, если задач нет
       ) : (
         <ul>
           {tasks.map(task => (
@@ -78,10 +93,10 @@ export const Todolist: React.FC<PropsType> = ({
               <input
                 type="checkbox"
                 checked={task.isDone}
-                onChange={changeTaskStatusHandler(task.id)} // Добавляем обработчик изменения статуса
+                onChange={changeTaskStatusHandler(task.id)} // Обработчик изменения статуса задачи
               />
               <span>{task.title}</span>
-              <Button onClick={() => removeTask(task.id)} title={'x'} />
+              <Button onClick={() => removeTask(task.id, todolistId)} title={'x'} /> {/* Кнопка для удаления задачи */}
             </li>
           ))}
         </ul>
@@ -90,23 +105,22 @@ export const Todolist: React.FC<PropsType> = ({
         <Button
           className={currentFilter === 'all' ? 'active-filter' : ''}
           title={'All'}
-          onClick={() => changeFilter('all', todolistId)} // Передаю два аргумента
+          onClick={() => changeFilter('all', todolistId)} // Вызов changeFilter для фильтра 'all'
         />
         <Button
           className={currentFilter === 'active' ? 'active-filter' : ''}
           title={'Active'}
-          onClick={() => changeFilter('active', todolistId)} // Передаю два аргумента
+          onClick={() => changeFilter('active', todolistId)} // Вызов changeFilter для фильтра 'active'
         />
         <Button
           className={currentFilter === 'completed' ? 'active-filter' : ''}
           title={'Completed'}
-          onClick={() => changeFilter('completed', todolistId)} // Передаю два аргумента
+          onClick={() => changeFilter('completed', todolistId)} // Вызов changeFilter для фильтра 'completed'
         />
       </div>
     </div>
   );
 };
-
 
 
 //добавлены кнопки, которые вызывают функцию changeFilter при клике, чтобы изменить состояние фильтра в App

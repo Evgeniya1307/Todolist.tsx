@@ -87,3 +87,10 @@ code {
 .is-done {
   opacity: 0.5;
 }
+
+/*display задает тип контейнера для его содержимого.
+Значение flex превращает элемент в flex-контейнер, что позволяет использовать Flexbox для размещения его дочерних элементов lign-items задает выравнивание дочерних элементов по оси Y  */
+.todolist-title-container {
+  display: flex;
+  align-items: center;
+}
