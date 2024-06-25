@@ -1,6 +1,8 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import { Button } from './Button';
 import { FilterValuesType } from './App';
+import { AddItemForm } from './AddItemForm';
+import { EditableSpan } from './EditableSpan';
 
 // Типы данных для задачи
 type TaskType = {
@@ -11,15 +13,18 @@ type TaskType = {
 
 // Пропсы
 type PropsType = {
-  title: string;
-  todolistId: string;
-  tasks: TaskType[];
-  removeTask: (taskId: string, todolistId: string) => void;
-  removeTodolist: (todolistId: string) => void; // Добавляем removeTodolist как пропс
-  changeFilter: (filter: FilterValuesType, todolistId: string) => void;
-  addTask: (title: string, todolistId: string) => void;
-  changeTaskStatus: (taskId: string, isDone: boolean, todolistId: string) => void;
-  currentFilter: FilterValuesType;
+  title: string; // Заголовок списка дел
+  todolistId: string; // ID списка дел
+  tasks: TaskType[]; // Массив задач
+  removeTask: (taskId: string, todolistId: string) => void; // Функция для удаления задачи
+  removeTodolist: (todolistId: string) => void; // Функция для удаления списка дел
+  changeFilter: (filter: FilterValuesType, todolistId: string) => void; // Функция для изменения фильтра
+  addTask: (title: string, todolistId: string) => void; // Функция для добавления задачи
+  changeTaskStatus: (taskId: string, isDone: boolean, todolistId: string) => void; // Функция для изменения статуса задачи
+  currentFilter: FilterValuesType; // Текущий фильтр списка дел
+  value: string; // Значение заголовка
+  changeTodolistTitle: (newTitle: string, todolistId: string) => void; // Функция для изменения заголовка списка дел
+  changeTaskTitle: (taskId: string, newTitle: string, todolistId: string) => void; // Функция для изменения заголовка задачи
 };
 
 export const Todolist: React.FC<PropsType> = ({
@@ -31,26 +36,14 @@ export const Todolist: React.FC<PropsType> = ({
   changeFilter,
   addTask,
   changeTaskStatus,
-  currentFilter
+  currentFilter,
+  value,
+  changeTodolistTitle,
+  changeTaskTitle
 }) => {
-  //будет выз-ся для удаления списка дел
+  // Функция для удаления списка дел
   const removeTodolistHandler = () => {
     removeTodolist(todolistId);
-  };
-
-  // Стейт для хранения заголовка новой задачи
-  const [taskTitle, setTaskTitle] = useState('');
-  // Стейт для хранения ошибки
-  const [error, setError] = useState<string | null>(null); //либо строка либо нул
-
-  // Обработчик для добавления новой задачи
-  const addTaskHandler = () => {
-    if (taskTitle.trim() !== '') {
-      addTask(taskTitle.trim(), todolistId); // Добавление новой задачи с учетом todolistId
-      setTaskTitle(''); // Очистка поля ввода после добавления задачи
-    } else {
-      setError('Title is required'); // Установка ошибки, если заголовок пустой
-    }
   };
 
   // Обработчик для изменения статуса задачи
@@ -59,31 +52,20 @@ export const Todolist: React.FC<PropsType> = ({
     changeTaskStatus(taskId, newStatusValue, todolistId); // Изменение статуса задачи с учетом todolistId
   };
 
-  // Обработчик для нажатия клавиши Enter в поле ввода
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    setError(null); // Сброс ошибки при вводе текста
-    if (event.key === 'Enter') {
-      addTaskHandler(); // Вызов добавления задачи при нажатии Enter
-    }
+  // Обработчик для изменения заголовка списка дел
+  const changeTitleHandler = (newTitle: string) => {
+    changeTodolistTitle(newTitle, todolistId);
   };
 
   return (
     <div className="todolist">
       <div className={'todolist-title-container'}>
-        <h3>{title}</h3>
-        <Button title={'x'} onClick={removeTodolistHandler} />
+        <h3>
+          <EditableSpan value={title} onChange={changeTitleHandler} /> {/* Компонент EditableSpan для редактирования заголовка */}
+        </h3>
+        <Button title={'x'} onClick={removeTodolistHandler} /> {/* Кнопка для удаления списка дел */}
       </div>
-      <div className="input-group">
-        <input
-          className={error ? 'error' : ''}
-          type="text"
-          value={taskTitle}
-          onChange={event => setTaskTitle(event.currentTarget.value)} // Обновление стейта taskTitle при изменении текста
-          onKeyUp={handleKeyPress} // Вызов handleKeyPress при отпускании клавиши
-        />
-        <Button title={'+'} onClick={addTaskHandler} /> {/* Кнопка для добавления новой задачи */}
-        {error && <div className={'error-message'}>{error}</div>} {/* Сообщение об ошибке */}
-      </div>
+      <AddItemForm addItem={(title) => addTask(title, todolistId)}/> {/* Форма для добавления новой задачи */}
       {tasks.length === 0 ? (
         <p>Тасок нет</p> // Отображение сообщения, если задач нет
       ) : (
@@ -95,7 +77,7 @@ export const Todolist: React.FC<PropsType> = ({
                 checked={task.isDone}
                 onChange={changeTaskStatusHandler(task.id)} // Обработчик изменения статуса задачи
               />
-              <span>{task.title}</span>
+              <EditableSpan value={task.title} onChange={(newTitle) => changeTaskTitle(task.id, newTitle, todolistId)} /> {/* Компонент EditableSpan для редактирования заголовка задачи */}
               <Button onClick={() => removeTask(task.id, todolistId)} title={'x'} /> {/* Кнопка для удаления задачи */}
             </li>
           ))}
@@ -121,7 +103,6 @@ export const Todolist: React.FC<PropsType> = ({
     </div>
   );
 };
-
 
 //добавлены кнопки, которые вызывают функцию changeFilter при клике, чтобы изменить состояние фильтра в App
 // кнопки вызывают changeFilter с правильным типом аргумента ('all', 'active', 'completed')
