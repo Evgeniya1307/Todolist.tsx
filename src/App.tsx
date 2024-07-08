@@ -1,8 +1,20 @@
-import { useState } from 'react';
-import './App.css';
-import { Todolist } from './Todolist';
-import { v1 } from 'uuid';
-import { AddItemForm } from './AddItemForm';
+import React, { useState } from 'react';
+import './App.css'; // Импортируем стили приложения
+import { Todolist } from './Todolist'; // Импортируем компонент Todolist
+import { v1 } from 'uuid'; // Импортируем функцию для генерации уникальных ID
+import { AddItemForm } from './AddItemForm'; // Импортируем компонент AddItemForm
+import AppBar from '@mui/material/AppBar'; // Импортируем компонент AppBar из Material-UI
+import Toolbar from '@mui/material/Toolbar'; // Импортируем компонент Toolbar из Material-UI
+import Typography from '@mui/material/Typography'; // Импортируем компонент Typography из Material-UI
+import Container from '@mui/material/Container'; // Импортируем компонент Container из Material-UI
+import Grid from '@mui/material/Unstable_Grid2'; // Импортируем компонент Grid из Material-UI (неустойчивый)
+import Paper from '@mui/material/Paper'; // Импортируем компонент Paper из Material-UI
+import IconButton from '@mui/material/IconButton'; // Импортируем компонент IconButton из Material-UI
+import MenuIcon from '@mui/icons-material/Menu'; // Импортируем иконку Menu из Material-UI
+import { createTheme, ThemeProvider } from '@mui/material/styles'; // Импортируем createTheme и ThemeProvider
+import Switch from '@mui/material/Switch'; // Импортируем компонент Switch из Material-UI
+import CssBaseline from '@mui/material/CssBaseline'; // Импортируем компонент CssBaseline из Material-UI
+import { MenuButton } from './MenuButton'; // Импортируем компонент MenuButton
 
 // Тип данных для задачи
 type TaskType = {
@@ -26,14 +38,35 @@ type TasksStateType = {
   [key: string]: TaskType[];
 };
 
+// Тип данных для режима темы
+type ThemeMode = 'dark' | 'light';
+
 function App() {
-  // Состояние для хранения списка дел
+  // Создаем состояние для хранения текущего режима темы
+  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
+
+  // Создаем тему
+  const theme = createTheme({
+    palette: {
+      mode: themeMode,
+      primary: {
+        main: '#087EA4', // Основной цвет
+      },
+    },
+  });
+
+  // Функция для изменения режима темы
+  const changeModeHandler = () => {
+    setThemeMode(themeMode === 'light' ? 'dark' : 'light');
+  };
+
+  // Создаем состояние для хранения списка дел
   const [todolists, setTodolists] = useState<TodolistType[]>([
     { id: v1(), title: 'What to learn', filter: 'all' },
     { id: v1(), title: 'What to buy', filter: 'all' },
   ]);
 
-  // Состояние для хранения задач
+  // Создаем состояние для хранения задач
   const [tasks, setTasks] = useState<TasksStateType>({
     [todolists[0].id]: [
       { id: v1(), title: 'HTML&CSS', isDone: true },
@@ -78,15 +111,11 @@ function App() {
 
   // Функция для изменения статуса задачи
   const changeTaskStatus = (taskId: string, isDone: boolean, todolistId: string) => {
-    // Обновляем массив задач в конкретном списке дел
     const updatedTasks = tasks[todolistId].map(task =>
-      // Если ID задачи совпадает с переданным taskId, создаем новую задачу с обновленным статусом isDone
       task.id === taskId ? { ...task, isDone } : task
     );
-    // Обновляем состояние tasks, заменяя старый массив задач на обновленный для указанного списка дел
     setTasks({ ...tasks, [todolistId]: updatedTasks });
   };
-  
 
   // Функция для изменения заголовка задачи
   const changeTaskTitle = (taskId: string, newTitle: string, todolistId: string) => {
@@ -111,41 +140,63 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <AddItemForm addItem={addTodolist} /> {/* Использование компонента AddItemForm для добавления нового списка дел */}
-      {todolists.map(tl => {
-        const allTodolistTasks = tasks[tl.id];
-        let tasksForTodolist = tasks[tl.id];
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AppBar position="static" sx={{ mb: '30px' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <IconButton color="inherit">
+            <MenuIcon />
+          </IconButton>
+          <div>
+            <MenuButton>Login</MenuButton>
+            <MenuButton>Logout</MenuButton>
+            <MenuButton background={theme.palette.primary.dark}>Faq</MenuButton>
+            <Switch color={'default'} onChange={changeModeHandler} />
+          </div>
+        </Toolbar>
+      </AppBar>
+      <Container fixed>
+        <Grid container sx={{ mb: '30px' }}>
+          <AddItemForm addItem={addTodolist} />
+        </Grid>
 
-        // Фильтрация задач в зависимости от текущего фильтра
-        if (tl.filter === 'active') {
-          tasksForTodolist = allTodolistTasks.filter(task => !task.isDone);
-        }
-        if (tl.filter === 'completed') {
-          tasksForTodolist = allTodolistTasks.filter(task => task.isDone);
-        }
-        return (
-          <Todolist
-            key={tl.id}
-            todolistId={tl.id}
-            title={tl.title}
-            tasks={tasksForTodolist}
-            removeTask={removeTask}
-            changeFilter={(filter) => changeFilter(filter, tl.id)}
-            addTask={(title) => addTask(title, tl.id)}
-            changeTaskStatus={(taskId, isDone) => changeTaskStatus(taskId, isDone, tl.id)}
-            removeTodolist={removeTodolist}
-            currentFilter={tl.filter}
-            value={tl.title} // Передача заголовка в Todolist
-            changeTodolistTitle={changeTodolistTitle} // Передача функции для изменения заголовка списка дел
-            changeTaskTitle={changeTaskTitle} // Передача функции для изменения заголовка задачи
-          />
-        );
-      })}
-    </div>
+        <Grid container spacing={4}>
+          {todolists.map(tl => {
+            const allTodolistTasks = tasks[tl.id];
+            let tasksForTodolist = tasks[tl.id];
+
+            if (tl.filter === 'active') {
+              tasksForTodolist = allTodolistTasks.filter(task => !task.isDone);
+            }
+            if (tl.filter === 'completed') {
+              tasksForTodolist = allTodolistTasks.filter(task => task.isDone);
+            }
+
+            return (
+              <Grid key={tl.id} xs={12} md={6} lg={4} component="div">
+                <Paper sx={{ p: '0 20px 20px 20px' }}>
+                  <Todolist
+                    todolistId={tl.id}
+                    title={tl.title}
+                    tasks={tasksForTodolist}
+                    removeTask={removeTask}
+                    changeFilter={(filter) => changeFilter(filter, tl.id)}
+                    addTask={(title) => addTask(title, tl.id)}
+                    changeTaskStatus={(taskId, isDone) => changeTaskStatus(taskId, isDone, tl.id)}
+                    removeTodolist={removeTodolist}
+                    currentFilter={tl.filter}
+                    value={tl.title}
+                    changeTodolistTitle={changeTodolistTitle}
+                    changeTaskTitle={changeTaskTitle}
+                  />
+                </Paper>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Container>
+    </ThemeProvider>
   );
 }
 
 export default App;
-
-

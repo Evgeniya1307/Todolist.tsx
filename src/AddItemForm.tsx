@@ -1,8 +1,11 @@
 //чтобы переиспользовать
 //будет и новый тудулист добавлять и добавлять таску
-import { Button } from './Button' 
-import { ChangeEvent, KeyboardEvent, useState } from 'react' 
 
+import { ChangeEvent, KeyboardEvent, useState } from 'react' 
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'; // Импортирую TextField
+import AddBoxIcon from '@mui/icons-material/AddBox'
+import IconButton from '@mui/material/IconButton'
 // Определение типа пропсов для компонента AddItemForm
 type PropsType = {
   addItem: (title: string) => void // Функция addItem принимает строку и ничего не возвращает
@@ -39,13 +42,18 @@ export const AddItemForm = ({ addItem }: PropsType) => {
 
   return (
     <div>
-      <input
-        className={error ? 'error' : ''} // Применение класса 'error' при наличии ошибки
-        value={title} // Привязка значения input к состоянию title
-        onChange={changeItemHandler} // Обработчик изменения значения в поле ввода
-        onKeyUp={addItemOnKeyUpHandler} // Обработчик нажатия клавиш в поле ввода
-      />
-      <Button title={'+'} onClick={addItemHandler} /> {/* Кнопка для добавления элемента, обработчик нажатия */}
+      <TextField
+  label="Enter a title"
+  variant={'outlined'}
+  className={error ? 'error' : ''}
+  value={title}
+  size={'small'}
+  onChange={changeItemHandler}
+  onKeyUp={addItemOnKeyUpHandler}
+/>
+<IconButton onClick={addItemHandler} color={'primary'}>
+        <AddBoxIcon />
+      </IconButton> {/* Кнопка для добавления элемента, обработчик нажатия */}
       {error && <div className={'error-message'}>{error}</div>} {/* Отображение сообщения об ошибке при её наличии */}
     </div>
   )

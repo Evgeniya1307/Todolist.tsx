@@ -12,15 +12,6 @@ code {
     monospace;
 }
 
-.App {
-  padding: 30px;
-  display: flex;
-}
-
-.App > div {
-  margin-right: 50px;
-}
-
 .todolist {
   padding: 20px;
   margin-bottom: 20px;
@@ -82,15 +73,21 @@ code {
   background-color: lightgreen;
 }
 
-/* Стили для выполненных тасок */
-
-.is-done {
-  opacity: 0.5;
-}
-
-/*display задает тип контейнера для его содержимого.
-Значение flex превращает элемент в flex-контейнер, что позволяет использовать Flexbox для размещения его дочерних элементов lign-items задает выравнивание дочерних элементов по оси Y  */
+/* display задает тип контейнера для его содержимого.
+Значение flex превращает элемент в flex-контейнер, что позволяет использовать Flexbox для размещения его дочерних элементов. align-items задает выравнивание дочерних элементов по оси Y */
 .todolist-title-container {
   display: flex;
   align-items: center;
+}
+
+.AppBarOffset {
+  margin-top: 16px;
+}
+
+.AddItemFormOffset {
+  margin-bottom: 24px;
+}
+
+.PaperPadding {
+  padding: 16px;
 }

@@ -1,14 +1,17 @@
+import React from 'react';
+import MuiButton from '@mui/material/Button';
+
 type ButtonPropsType = {
   title: string;
-  onClick?: () => void; // необязательное поле
-  className?: string; // необязательное поле
+  onClick: () => void;
+  variant?: 'text' | 'outlined' | 'contained'; // Добавлено свойство variant
+  color?: 'inherit' | 'primary' | 'secondary'; // Добавлено свойство color
 };
 
-export const Button: React.FC<ButtonPropsType> = ({ title, onClick, className }) => {
+export const Button: React.FC<ButtonPropsType> = ({ title, onClick, variant = 'text', color = 'inherit' }) => {
   return (
-    <button className={className} onClick={onClick}>
+    <MuiButton variant={variant} color={color} onClick={onClick}>
       {title}
-    </button>
+    </MuiButton>
   );
 };
-
