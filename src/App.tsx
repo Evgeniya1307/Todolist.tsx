@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer } from 'react';
 import './App.css'; // Импортируем стили приложения
 import { Todolist } from './Todolist'; // Импортируем компонент Todolist
 import { v1 } from 'uuid'; // Импортируем функцию для генерации уникальных ID
@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'; // Импор
 import Switch from '@mui/material/Switch'; // Импортируем компонент Switch из Material-UI
 import CssBaseline from '@mui/material/CssBaseline'; // Импортируем компонент CssBaseline из Material-UI
 import { MenuButton } from './MenuButton'; // Импортируем компонент MenuButton
+import { todolistsReducer } from './model✳️/todolistsReducer'; // Импортируем редьюсер
 
 // Тип данных для задачи
 type TaskType = {
@@ -24,7 +25,7 @@ type TaskType = {
 };
 
 // Тип данных для списка дел
-type TodolistType = {
+export type TodolistType = {
   id: string;
   title: string;
   filter: FilterValuesType;
@@ -60,8 +61,8 @@ function App() {
     setThemeMode(themeMode === 'light' ? 'dark' : 'light');
   };
 
-  // Создаем состояние для хранения списка дел
-  const [todolists, setTodolists] = useState<TodolistType[]>([
+  // Инициализируем редьюсер для управления состоянием тудулистов
+  const [todolists, dispatch] = useReducer(todolistsReducer, [
     { id: v1(), title: 'What to learn', filter: 'all' },
     { id: v1(), title: 'What to buy', filter: 'all' },
   ]);
@@ -80,22 +81,21 @@ function App() {
 
   // Функция для удаления задачи
   const removeTask = (taskId: string, todolistId: string) => {
-    const updatedTasks = tasks[todolistId].filter(task => task.id !== taskId);
-    setTasks({ ...tasks, [todolistId]: updatedTasks });
+    const updatedTasks = tasks[todolistId].filter(task => task.id !== taskId); // Фильтруем задачи, удаляя указанную
+    setTasks({ ...tasks, [todolistId]: updatedTasks }); // Обновляем состояние задач
   };
 
   // Функция для удаления списка дел
   const removeTodolist = (todolistId: string) => {
-    const newTodolists = todolists.filter(tl => tl.id !== todolistId);
-    setTodolists(newTodolists);
-    const newTasks = { ...tasks };
-    delete newTasks[todolistId];
-    setTasks(newTasks);
+    dispatch({ type: 'REMOVE-TODOLIST', payload: { id: todolistId } }); // Отправляем action для удаления тудулиста
+    const newTasks = { ...tasks }; // Копируем текущее состояние задач
+    delete newTasks[todolistId]; // Удаляем задачи, связанные с указанным списком дел
+    setTasks(newTasks); // Обновляем состояние задач
   };
 
   // Функция для изменения фильтра списка дел
   const changeFilter = (filter: FilterValuesType, todolistId: string) => {
-    setTodolists(todolists.map(tl => (tl.id === todolistId ? { ...tl, filter } : tl)));
+    dispatch({ type: 'CHANGE-TODOLIST-FILTER', payload: { id: todolistId, filter } }); // Отправляем action для изменения фильтра
   };
 
   // Функция для добавления новой задачи
@@ -104,39 +104,35 @@ function App() {
       id: v1(),
       title,
       isDone: false,
-    };
-    const updatedTasks = [newTask, ...tasks[todolistId]];
-    setTasks({ ...tasks, [todolistId]: updatedTasks });
+    }; // Создаем новую задачу
+    const updatedTasks = [newTask, ...tasks[todolistId]]; // Добавляем новую задачу в список задач
+    setTasks({ ...tasks, [todolistId]: updatedTasks }); // Обновляем состояние задач
   };
 
   // Функция для изменения статуса задачи
   const changeTaskStatus = (taskId: string, isDone: boolean, todolistId: string) => {
     const updatedTasks = tasks[todolistId].map(task =>
       task.id === taskId ? { ...task, isDone } : task
-    );
-    setTasks({ ...tasks, [todolistId]: updatedTasks });
+    ); // Обновляем статус задачи
+    setTasks({ ...tasks, [todolistId]: updatedTasks }); // Обновляем состояние задач
   };
 
   // Функция для изменения заголовка задачи
   const changeTaskTitle = (taskId: string, newTitle: string, todolistId: string) => {
     const updatedTasks = tasks[todolistId].map(task => task.id === taskId ? { ...task, title: newTitle } : task);
-    setTasks({ ...tasks, [todolistId]: updatedTasks });
+    setTasks({ ...tasks, [todolistId]: updatedTasks }); // Обновляем состояние задач
   };
 
   // Функция для изменения заголовка списка дел
   const changeTodolistTitle = (newTitle: string, todolistId: string) => {
-    setTodolists(todolists.map(tl => (tl.id === todolistId ? { ...tl, title: newTitle } : tl)));
+    dispatch({ type: 'CHANGE-TODOLIST-TITLE', payload: { id: todolistId, title: newTitle } }); // Отправляем action для изменения заголовка
   };
 
   // Функция для добавления нового списка дел
   const addTodolist = (title: string) => {
-    const newTodolist: TodolistType = {
-      id: v1(),
-      title,
-      filter: 'all',
-    };
-    setTodolists([...todolists, newTodolist]);
-    setTasks({ ...tasks, [newTodolist.id]: [] });
+    const newTodolistId = v1(); // Создаем новый уникальный ID для тудулиста
+    dispatch({ type: 'ADD-TODOLIST', payload: { title, id: newTodolistId } }); // Отправляем action для добавления нового тудулиста
+    setTasks({ ...tasks, [newTodolistId]: [] }); // Добавляем новый пустой список задач
   };
 
   return (
@@ -157,19 +153,19 @@ function App() {
       </AppBar>
       <Container fixed>
         <Grid container sx={{ mb: '30px' }}>
-          <AddItemForm addItem={addTodolist} />
+          <AddItemForm addItem={addTodolist} /> {/* Форма для добавления нового тудулиста */}
         </Grid>
 
         <Grid container spacing={4}>
-          {todolists.map(tl => {
+          {todolists.map((tl: TodolistType) => {
             const allTodolistTasks = tasks[tl.id];
             let tasksForTodolist = tasks[tl.id];
 
             if (tl.filter === 'active') {
-              tasksForTodolist = allTodolistTasks.filter(task => !task.isDone);
+              tasksForTodolist = allTodolistTasks.filter(task => !task.isDone); // Фильтрация задач для отображения только невыполненных
             }
             if (tl.filter === 'completed') {
-              tasksForTodolist = allTodolistTasks.filter(task => task.isDone);
+              tasksForTodolist = allTodolistTasks.filter(task => task.isDone); // Фильтрация задач для отображения только выполненных
             }
 
             return (
