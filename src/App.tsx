@@ -15,10 +15,10 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'; // Импор
 import Switch from '@mui/material/Switch'; // Импортируем компонент Switch из Material-UI
 import CssBaseline from '@mui/material/CssBaseline'; // Импортируем компонент CssBaseline из Material-UI
 import { MenuButton } from './MenuButton'; // Импортируем компонент MenuButton
-import { todolistsReducer } from './model✳️/todolistsReducer'; // Импортируем редьюсер
+import { todolistsReducer } from './model✳️/todolistsReducer'
 
 // Тип данных для задачи
-type TaskType = {
+export type TaskType = {
   id: string;
   title: string;
   isDone: boolean;
@@ -35,7 +35,7 @@ export type TodolistType = {
 export type FilterValuesType = 'all' | 'active' | 'completed';
 
 // Тип данных для состояния задач
-type TasksStateType = {
+export type TasksStateType = {
   [key: string]: TaskType[];
 };
 
@@ -87,7 +87,7 @@ function App() {
 
   // Функция для удаления списка дел
   const removeTodolist = (todolistId: string) => {
-    dispatch({ type: 'REMOVE-TODOLIST', payload: { id: todolistId } }); // Отправляем action для удаления тудулиста
+    dispatch({ type: 'REMOVE-TODOLIST', payload: { todolistId } }); // Отправляем action для удаления тудулиста
     const newTasks = { ...tasks }; // Копируем текущее состояние задач
     delete newTasks[todolistId]; // Удаляем задачи, связанные с указанным списком дел
     setTasks(newTasks); // Обновляем состояние задач
@@ -95,7 +95,7 @@ function App() {
 
   // Функция для изменения фильтра списка дел
   const changeFilter = (filter: FilterValuesType, todolistId: string) => {
-    dispatch({ type: 'CHANGE-TODOLIST-FILTER', payload: { id: todolistId, filter } }); // Отправляем action для изменения фильтра
+    dispatch({ type: 'CHANGE-TODOLIST-FILTER', payload: { todolistId, filter } }); // Отправляем action для изменения фильтра
   };
 
   // Функция для добавления новой задачи
@@ -125,13 +125,13 @@ function App() {
 
   // Функция для изменения заголовка списка дел
   const changeTodolistTitle = (newTitle: string, todolistId: string) => {
-    dispatch({ type: 'CHANGE-TODOLIST-TITLE', payload: { id: todolistId, title: newTitle } }); // Отправляем action для изменения заголовка
+    dispatch({ type: 'CHANGE-TODOLIST-TITLE', payload: { todolistId, title: newTitle } }); // Отправляем action для изменения заголовка
   };
 
   // Функция для добавления нового списка дел
   const addTodolist = (title: string) => {
     const newTodolistId = v1(); // Создаем новый уникальный ID для тудулиста
-    dispatch({ type: 'ADD-TODOLIST', payload: { title, id: newTodolistId } }); // Отправляем action для добавления нового тудулиста
+    dispatch({ type: 'ADD-TODOLIST', payload: { title, todolistId: newTodolistId } }); // Отправляем action для добавления нового тудулиста
     setTasks({ ...tasks, [newTodolistId]: [] }); // Добавляем новый пустой список задач
   };
 
