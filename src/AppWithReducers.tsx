@@ -30,87 +30,97 @@ import {
 } from './model✳️/tasks-reducer'; 
 import { TaskType, TodolistType, FilterValuesType, TasksStateType } from './App';
 
+// Главный компонент приложения
 function AppWithReducers() {
-  // Тема приложения
+  // Создаем тему приложения (светлая или темная)
   const [themeMode, setThemeMode] = useReducer((state) => (state === 'light' ? 'dark' : 'light'), 'light');
   const theme = createTheme({ palette: { mode: themeMode, primary: { main: '#087EA4' } } });
 
-  // Редьюсер для тудулистов
+  // Используем useReducer для управления состоянием тудулистов
   const [todolists, dispatchTodolists] = useReducer(todolistsReducer, [
-    { id: v1(), title: 'What to learn', filter: 'all' },
+    { id: v1(), title: 'What to learn', filter: 'all' },  // Начальные данные тудулистов
     { id: v1(), title: 'What to buy', filter: 'all' },
   ]);
 
-  // Редьюсер для задач
+  // Используем useReducer для управления состоянием задач
   const [tasks, dispatchTasks] = useReducer(tasksReducer, {
-    [todolists[0].id]: [
+    [todolists[0].id]: [  // Привязываем задачи к первому тудулисту
       { id: v1(), title: 'HTML&CSS', isDone: true },
       { id: v1(), title: 'JS', isDone: true },
     ],
-    [todolists[1].id]: [
+    [todolists[1].id]: [  // Привязываем задачи ко второму тудулисту
       { id: v1(), title: 'Milk', isDone: false },
       { id: v1(), title: 'Bread', isDone: false },
     ],
   } as TasksStateType);
 
+  // Функция для удаления задачи
   const removeTask = (taskId: string, todolistId: string) => {
-    dispatchTasks(removeTaskAC(taskId, todolistId));
+    dispatchTasks(removeTaskAC(taskId, todolistId));  // Отправляем action для удаления задачи в reducer
   };
 
+  // Функция для добавления новой задачи
   const addTask = (title: string, todolistId: string) => {
-    dispatchTasks(addTaskAC(title, todolistId));
+    dispatchTasks(addTaskAC(title, todolistId));  // Отправляем action для добавления задачи в reducer
   };
 
+  // Функция для изменения статуса задачи (выполнена или нет)
   const changeTaskStatus = (taskId: string, isDone: boolean, todolistId: string) => {
-    dispatchTasks(changeTaskStatusAC(taskId, isDone, todolistId));
+    dispatchTasks(changeTaskStatusAC(taskId, isDone, todolistId));  // Отправляем action для изменения статуса задачи в reducer
   };
 
+  // Функция для изменения заголовка задачи
   const changeTaskTitle = (taskId: string, newTitle: string, todolistId: string) => {
-    dispatchTasks(changeTaskTitleAC(taskId, newTitle, todolistId));
+    dispatchTasks(changeTaskTitleAC(taskId, newTitle, todolistId));  // Отправляем action для изменения заголовка задачи в reducer
   };
 
+  // Функция для удаления тудулиста
   const removeTodolist = (todolistId: string) => {
-    dispatchTodolists(removeTodolistAC(todolistId)); // Удаляем тудулист
-    dispatchTasks(removeTodolistAC(todolistId)); // Удаляем все задачи, связанные с этим тудулистом
+    const action = removeTodolistAC(todolistId);  // Создаем action для удаления тудулиста
+    dispatchTodolists(action);  // Отправляем action для удаления тудулиста в todolistsReducer
+    dispatchTasks(action);  // Отправляем action для удаления всех задач, связанных с этим тудулистом, в tasksReducer
   };
 
+  // Функция для добавления нового тудулиста
   const addTodolist = (title: string) => {
-    const action = addTodolistAC(title); // Генерируем новый тудулист
-    dispatchTodolists(action); // Обновляем список тудулистов
-    dispatchTasks(action); // Добавляем пустой список задач для нового тудулиста
+    const action = addTodolistAC(title);  // Создаем action для добавления нового тудулиста
+    dispatchTodolists(action);  // Отправляем action для добавления тудулиста в todolistsReducer
+    dispatchTasks(action);  // Отправляем action для создания пустого списка задач для нового тудулиста в tasksReducer
   };
 
+  // Функция для изменения заголовка тудулиста
   const changeTodolistTitle = (todolistId: string, newTitle: string) => {
-    dispatchTodolists(changeTodolistTitleAC(todolistId, newTitle)); // Обновляем заголовок тудулиста
+    dispatchTodolists(changeTodolistTitleAC(todolistId, newTitle));  // Отправляем action для изменения заголовка тудулиста в todolistsReducer
   };
 
+  // Функция для изменения фильтра задач в тудулисте (все, активные, выполненные)
   const changeFilter = (filter: FilterValuesType, todolistId: string) => {
-    dispatchTodolists(changeTodolistFilterAC(todolistId, filter)); // Изменяем фильтр задач в тудулисте
+    dispatchTodolists(changeTodolistFilterAC(todolistId, filter));  // Отправляем action для изменения фильтра в todolistsReducer
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeProvider theme={theme}>  {/* Применяем выбранную тему ко всему приложению */}
+      <CssBaseline />  {/* Устанавливаем базовые стили для всего приложения */}
       <AppBar position="static" sx={{ mb: '30px' }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <IconButton color="inherit">
             <MenuIcon />
           </IconButton>
-          <Switch color="default" onChange={() => setThemeMode()} />
+          <Switch color="default" onChange={() => setThemeMode()} />  {/* Переключатель темы */}
         </Toolbar>
       </AppBar>
       <Container fixed>
         <Grid container sx={{ mb: '30px' }}>
-          <AddItemForm addItem={addTodolist} /> 
+          <AddItemForm addItem={addTodolist} />  {/* Форма для добавления нового тудулиста */}
         </Grid>
         <Grid container spacing={4}>
           {todolists.map((tl) => {
             let tasksForTodolist = tasks[tl.id];
             if (tl.filter === 'active') {
-              tasksForTodolist = tasks[tl.id].filter(task => !task.isDone);
+              tasksForTodolist = tasks[tl.id].filter(task => !task.isDone);  // Фильтруем задачи по статусу "активные"
             }
             if (tl.filter === 'completed') {
-              tasksForTodolist = tasks[tl.id].filter(task => task.isDone);
+              tasksForTodolist = tasks[tl.id].filter(task => task.isDone);  // Фильтруем задачи по статусу "выполненные"
             }
 
             return (
