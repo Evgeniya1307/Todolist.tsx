@@ -1,6 +1,6 @@
 import React from 'react'; // Импортируем React для использования JSX
 import { render } from '@testing-library/react'; // Импортируем функцию render из библиотеки для тестирования React-компонентов
-import App from './App'; // Импортируем тестируемый компонент App
+import App from './app/App'; // Импортируем тестируемый компонент App
 
 // Тест для проверки наличия формы добавления нового элемента
 test('renders add item form', () => {

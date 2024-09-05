@@ -1,5 +1,5 @@
 import { v1 } from 'uuid'; 
-import { TaskType, TasksStateType } from '../App';
+import { TaskType, TasksStateType } from '../model✳️/types';
 
 // Экшен для удаления задачи
 export const removeTaskAC = (taskId: string, todolistId: string) => ({
@@ -35,49 +35,45 @@ type TaskActionsType =
   | { type: 'REMOVE-TODOLIST'; payload: { todolistId: string } };
 
 // Редьюсер для управления состоянием задач
-export const tasksReducer = (state: TasksStateType, action: TaskActionsType): TasksStateType => {
+export const initialTasksState: TasksStateType = {};
+
+export const tasksReducer = (state: TasksStateType = initialTasksState, action: TaskActionsType): TasksStateType => {
   switch (action.type) {
-    case 'REMOVE-TASK': {
+    case 'REMOVE-TASK':
       return {
         ...state,
         [action.payload.todolistId]: state[action.payload.todolistId].filter(task => task.id !== action.payload.taskId)
       };
-    }
-    case 'ADD-TASK': {
+    case 'ADD-TASK':
       const newTask: TaskType = { id: v1(), title: action.payload.title, isDone: false };
       return {
         ...state,
         [action.payload.todolistId]: [newTask, ...state[action.payload.todolistId]]
       };
-    }
-    case 'CHANGE-TASK-STATUS': {
+    case 'CHANGE-TASK-STATUS':
       return {
         ...state,
         [action.payload.todolistId]: state[action.payload.todolistId].map(task =>
           task.id === action.payload.taskId ? { ...task, isDone: action.payload.isDone } : task
         )
       };
-    }
-    case 'CHANGE-TASK-TITLE': {
+    case 'CHANGE-TASK-TITLE':
       return {
         ...state,
         [action.payload.todolistId]: state[action.payload.todolistId].map(task =>
           task.id === action.payload.taskId ? { ...task, title: action.payload.newTitle } : task
         )
       };
-    }
-    case 'ADD-TODOLIST': {
+    case 'ADD-TODOLIST':
       return {
         ...state,
         [action.payload.todolistId]: []
       };
-    }
-    case 'REMOVE-TODOLIST': {
+    case 'REMOVE-TODOLIST':
       const copyState = { ...state };
       delete copyState[action.payload.todolistId];
       return copyState;
-    }
     default:
-      return state;
+      return state; // Возвращаем текущее состояние по умолчанию
   }
 };

@@ -1,59 +1,62 @@
 import { v1 } from 'uuid'; 
-import { TodolistType, FilterValuesType } from '../App'; 
+import { TodolistType, FilterValuesType } from './types';
 
-// Экшены для тудулистов
+// Экшен-криейторы
+// Начальное состояние тудулистов, пустой массив
+const initialTodolistsState: TodolistType[] = [];
+
+// Экшен-криейторы для управления тудулистами
+export const removeTodolistAC = (id: string) => ({
+  type: 'REMOVE-TODOLIST',
+  payload: { id }
+});
+
 export const addTodolistAC = (title: string) => ({
   type: 'ADD-TODOLIST',
   payload: { title, todolistId: v1() }
-} as const);
+});
 
-export const removeTodolistAC = (todolistId: string) => ({
-  type: 'REMOVE-TODOLIST',
-  payload: { todolistId }
-} as const);
-
-export const changeTodolistFilterAC = (todolistId: string, filter: FilterValuesType) => ({
-  type: 'CHANGE-TODOLIST-FILTER',
-  payload: { todolistId, filter }
-} as const);
-
-export const changeTodolistTitleAC = (todolistId: string, title: string) => ({
+export const changeTodolistTitleAC = (id: string, title: string) => ({
   type: 'CHANGE-TODOLIST-TITLE',
-  payload: { todolistId, title }
-} as const);
+  payload: { id, title }
+});
 
-// Типизация экшенов для тудулистов
-export type ActionsType = 
-  | ReturnType<typeof addTodolistAC>
-  | ReturnType<typeof removeTodolistAC>
-  | ReturnType<typeof changeTodolistFilterAC>
-  | ReturnType<typeof changeTodolistTitleAC>;
+export const changeTodolistFilterAC = (id: string, filter: FilterValuesType) => ({
+  type: 'CHANGE-TODOLIST-FILTER',
+  payload: { id, filter }
+});
 
-// Редьюсер для тудулистов
-export const todolistsReducer = (state: TodolistType[], action: ActionsType): TodolistType[] => {
+// Редьюсер для управления состоянием тудулистов
+// Мы задаем начальное состояние по умолчанию как пустой массив `initialTodolistsState`
+export const todolistsReducer = (
+  state: TodolistType[] = initialTodolistsState, // Если не передано состояние, используем начальное значение
+  action: any
+): TodolistType[] => {
   switch (action.type) {
-    case 'ADD-TODOLIST':
-      const newTodolist: TodolistType = {
-        id: action.payload.todolistId,
-        title: action.payload.title,
-        filter: 'all',
-      };
-      return [...state, newTodolist];
-
     case 'REMOVE-TODOLIST':
-      return state.filter(tl => tl.id !== action.payload.todolistId);
+      // Удаляем тудулист по id
+      return state.filter(tl => tl.id !== action.payload.id);
 
-    case 'CHANGE-TODOLIST-FILTER':
-      return state.map(tl => 
-        tl.id === action.payload.todolistId ? { ...tl, filter: action.payload.filter } : tl
-      );
+    case 'ADD-TODOLIST':
+      // Добавляем новый тудулист с заголовком и фильтром по умолчанию
+      return [
+        ...state, 
+        { id: action.payload.todolistId, title: action.payload.title, filter: 'all' }
+      ];
 
     case 'CHANGE-TODOLIST-TITLE':
+      // Меняем заголовок тудулиста
       return state.map(tl => 
-        tl.id === action.payload.todolistId ? { ...tl, title: action.payload.title } : tl
+        tl.id === action.payload.id ? { ...tl, title: action.payload.title } : tl
+      );
+
+    case 'CHANGE-TODOLIST-FILTER':
+      // Меняем фильтр задач в тудулисте
+      return state.map(tl => 
+        tl.id === action.payload.id ? { ...tl, filter: action.payload.filter } : tl
       );
 
     default:
-      return state;
+      return state; // Возвращаем текущее состояние, если не распознали тип действия
   }
 };

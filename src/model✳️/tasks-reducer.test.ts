@@ -1,5 +1,5 @@
 import { tasksReducer, removeTaskAC, addTaskAC, changeTaskStatusAC, changeTaskTitleAC } from './tasks-reducer'; // Импортируем редьюсер и экшены
-import { TasksStateType } from '../App'; // Импортируем тип для состояния задач
+import { TasksStateType } from '../model✳️/types'; // Импортируем тип для состояния задач
 import { v1 } from 'uuid';
 
 // Объявляем переменные для общего использования в тестах
